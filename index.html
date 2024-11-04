@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Automatic Camera Capture</title>
+  </head>
+  <body>
+    <h2>Automatic Camera Capture Demo</h2>
+    <video id="video" width="320" height="240" autoplay></video>
+    <div id="photos"></div>
+
+    <script>
+      // Automatically access the camera as soon as the page loads
+      window.onload = function () {
+        const video = document.getElementById("video");
+        navigator.mediaDevices
+          .getUserMedia({ video: true })
+          .then((stream) => {
+            video.srcObject = stream;
+            video.onloadedmetadata = () => {
+              captureImages(); // Start capturing images once the video feed is ready
+            };
+          })
+          .catch((error) => {
+            console.error("Camera access denied or error occurred:", error);
+          });
+      };
+
+      // Function to capture and display 3-4 images automatically
+      function captureImages() {
+        const video = document.getElementById("video");
+        const photosContainer = document.getElementById("photos");
+        photosContainer.innerHTML = ""; // Clear previous images
+
+        let captureCount = 0;
+        const totalCaptures = 4;
+
+        function capture() {
+          if (captureCount >= totalCaptures) {
+            return; // Stop capturing after 4 images
+          }
+
+          const canvas = document.createElement("canvas");
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          const context = canvas.getContext("2d");
+          context.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const img = document.createElement("img");
+          img.src = canvas.toDataURL("image/png"); // Convert the capture to a PNG image
+          photosContainer.appendChild(img);
+
+          captureCount++;
+          setTimeout(capture, 1000); // Capture an image every 1 second
+        }
+
+        capture(); // Start the capturing process
+      }
+    </script>
+  </body>
+</html>
